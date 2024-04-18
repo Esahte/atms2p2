@@ -1,0 +1,46 @@
+0
+Stations: 11
+West Ruislip
+East Broadway
+North Action
+Noting Hill Gate
+Bond Street
+Liverpool Street
+Stanmore
+BakerStreet
+Westminister
+Waterloo
+Epping
+Segments: 7
+wrna: West Ruislip: North Action
+ebna: East Broadway:North Action
+nanhg:North Action: Noting Hill Gate
+nhgbs: Noting Hill Gate: Bond Street
+bslps:Bond Street: Liverpool Street
+lpsepp:Liverpool Street: Epping
+basbs: Baker Street: Bond Street
+Routes: 4
+R_WS_EP: false: wrna; nanhg; nhgbs; bslps; lpsepp
+R_EB_EP: false: ebna; nanhg; nhgbs; bslps; lpsepp
+R_BS_EP: false: bslps; lpsepp
+R_BAS_EP: false: basbs ; bslps ; lpsepp
+Trains: 5
+train_1:2: R_WS_EP: all
+train_2:0: R_EB_EP: all
+train_3:5: R_EB_EP: Noting Hill Gate; Liverpool Street
+train_4:1: R_EB_EP: all
+train_6:1: R_BAS_EP: Liverpool Street
+1
+Trains: 3
+train_1:2: R_WS_EP: all
+train_2:0: R_EB_EP: all
+train_3:5: R_EB_EP: Noting Hill Gate; Liverpool Street
+3
+Events: 1
+Close: Segment: basbs
+8
+Events: 1
+Open: Segment: basbs
+Trains: 2
+train_6:1: R_BAS_EP: Liverpool Street
+train_4:1: R_EB_EP: all
