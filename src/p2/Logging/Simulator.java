@@ -294,15 +294,13 @@ public class Simulator extends Logable {
                     if (e.getTime() != trainSystem.getCurrentTime())
                         flaggedEvents.add(e.toString());
                     addToLog(e);
+                    System.out.println(e.toString());  // Print each event descriptively as it occurs
                 }
 
                 // Check if the system is deadlocked
                 if (trainSystem.closureHinderingMovement()) {
                     trainSystem.setStopped();
                 }
-
-                // Print the current log of events
-                System.out.println(this.getEvents());
             }
         } finally {
             if (scanner != null) {

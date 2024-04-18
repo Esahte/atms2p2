@@ -543,8 +543,8 @@ public class TrainSystem implements IsVerifiable {
                 if (train.isAtStart() && !train.isWaiting() && train.getStatus() != TrainStatus.Started) {
                     // Start the train
                     events.add(train.start());
-                    // Open route, first segment and station
-                    events.addAll(openRouteAndFirstSegment(train));
+                    // Open route
+                    events.add(openRoute(train.getCurrentRoute().getName()));
                 } else if (train.getCurrentRoute().getEnd().getName().strip().equals(train.currentStation().strip())) { // Check if the train is at the end, and its end time is the current time
                     // Finish the train
                     events.add(train.finish());
@@ -577,20 +577,6 @@ public class TrainSystem implements IsVerifiable {
                 train.resetWaitTimeRemaining();
             }
         }
-    }
-
-    /**
-     * Opens the route and the first segment of the train.
-     *
-     * @param train The train to open the route and the first segment.
-     * @return A list of events that occur during the simulation.
-     */
-    private List<Event> openRouteAndFirstSegment(Train train) {
-        List<Event> events = new ArrayList<>();
-        events.add(openRoute(train.getCurrentRoute().getName()));
-        events.add(openStation(train.getCurrentRoute().getStart().getName()));
-        events.add(openSegment(train.getCurrentRoute().getSegmentList().get(0).getName()));
-        return events;
     }
 
     /**
