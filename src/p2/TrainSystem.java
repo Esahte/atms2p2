@@ -364,9 +364,12 @@ public class TrainSystem implements IsVerifiable {
 
         // If the train and route are found, and the train is not yet registered, and the route is verified and open
         if (train != null && route != null && !train.isRegistered() && route.verify() && route.isOpen()) {
+            ArrayList<String> allStations = route.getStationList().stream()
+                    .map(Station::getName)
+                    .collect(Collectors.toCollection(ArrayList::new));
             // Register the train to the route with the provided start time
             train.setCurrentRoute(route);
-            train.setDesignatedStops(stops);
+            train.setDesignatedStops((stops.isEmpty()) ? allStations : stops);
             train.register(getCurrentTime());
         }
     }
@@ -551,8 +554,8 @@ public class TrainSystem implements IsVerifiable {
                     // Deregister the train
                     deRegisterTrain(train.getName());
                 }
-            // Check the status of the train
-            checkTrainStatus(train, events);
+                // Check the status of the train
+                checkTrainStatus(train, events);
             }
         }
         return events;

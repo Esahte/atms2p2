@@ -326,15 +326,7 @@ public class Train extends Logable implements IsVerifiable {
      * @return an event representing the movement of the train
      */
     public Event advance(int time) {
-        if (isAtStart && designatedStops.isEmpty()) {
-            designatedStops = currentRoute.getStationList().stream().map(Station::getName).collect(Collectors.toCollection(ArrayList::new));
-            isAtStart = false;
-        }
-
         if (currentRoute.verify() && status.equals(TrainStatus.Started) && currentRoute.canGetTo(nextStation())) {
-            if (designatedStops.contains(currentStation())) {
-                resetWaitTimeRemaining();
-            }
             currentStation = currentRoute.getNextStation(currentStation());
         } else {
             System.out.print("There seems to be an issue with the route or the train status.");
