@@ -294,8 +294,8 @@ public class Simulator extends Logable {
                     if (e.getTime() != trainSystem.getCurrentTime())
                         flaggedEvents.add(e.toString());
                     addToLog(e);
-//                    addToLog(e.toString());  // Print each event descriptively as it occurs
-                    System.out.println(e.toString());
+                    addToLog(e.toString());  // Print each event descriptively as it occurs
+//                    System.out.println(e.toString());
                 }
 
                 // Check if the system is deadlocked
