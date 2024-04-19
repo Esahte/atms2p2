@@ -125,7 +125,7 @@ public class Simulator extends Logable {
         for (int i = 0; i < numberOfSegments; i++) {
             String segmentInfo = scanner.nextLine().trim();
             String[] segmentParts = segmentInfo.split(":");
-            trainSystem.addSegment(segmentParts[0].strip(), segmentParts[1], segmentParts[2]); // Assumes addSegment is a method in TrainSystem
+            trainSystem.addSegment(segmentParts[0].strip(), segmentParts[1].strip(), segmentParts[2].strip()); // Assumes addSegment is a method in TrainSystem
         }
     }
 
@@ -174,9 +174,9 @@ public class Simulator extends Logable {
      */
     private void processOpenEvent(String[] eventParts) {
         switch (eventParts[1].strip()) {
-            case "Station" -> trainSystem.openStation(eventParts[2].strip());
-            case "Segment" -> trainSystem.openSegment(eventParts[2].strip());
-            case "Route" -> trainSystem.openRoute(eventParts[2].strip());
+            case "Station" -> addToLog(trainSystem.openStation(eventParts[2].strip()));
+            case "Segment" -> addToLog(trainSystem.openSegment(eventParts[2].strip()));
+            case "Route" -> addToLog(trainSystem.openRoute(eventParts[2].strip()));
             default -> throw new IllegalArgumentException("Unknown event type for 'Open': " + eventParts[1]);
 
         }
@@ -211,11 +211,11 @@ public class Simulator extends Logable {
             String[] stops = trainParts[3].split(";");
             // Check the sops if it is equal to an empty string or "all" register the train with an empty array
             if ((stops.length == 0 || stops[0].strip().equals("all")) && trainSystem.getCurrentTime() > 0) {
-                trainSystem.registerTrain(trainParts[0], trainParts[2].strip(), new String[0]);
+                trainSystem.registerTrain(trainParts[0].strip(), trainParts[2].strip(), new String[0]);
             } else if (trainSystem.getCurrentTime() > 0) {
-                trainSystem.registerTrain(trainParts[0], trainParts[2].strip(), stops);
+                trainSystem.registerTrain(trainParts[0].strip(), trainParts[2].strip(), stops);
             } else if (trainSystem.getCurrentTime() == 0) {
-                trainSystem.addTrain(trainParts[0], Integer.parseInt(trainParts[1]));
+                trainSystem.addTrain(trainParts[0].strip(), Integer.parseInt(trainParts[1]));
             }
         }
     }

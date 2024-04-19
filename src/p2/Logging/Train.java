@@ -31,7 +31,7 @@ public class Train extends Logable implements IsVerifiable {
     // Represents the time the train was registered
     private int timeRegistered = 0;
     // Represents the start time of the train
-    private int startTime = 0;
+    private int startTime;
     // Represents the current location of the train
     private String currentLocation;
     // Represents the current station of the train
@@ -43,7 +43,7 @@ public class Train extends Logable implements IsVerifiable {
     // Represents if the train is at the start of the route
     private boolean isAtStart;
     // Represents the wait time remaining for the train
-    private int waitTimeRemaining = 0;
+    private int waitTimeRemaining;
     // Represents the designated stops of the train
     private ArrayList<String> designatedStops = new ArrayList<>();
     // Represents the status of the train
@@ -62,6 +62,7 @@ public class Train extends Logable implements IsVerifiable {
     public Train(String name, int startTime) {
         this.name = name.isEmpty() ? "Train " + id : name;
         this.startTime = startTime >= 0 ? startTime : this.startTime;
+        this.waitTimeRemaining = startTime;
     }
 
     // Getter methods
@@ -235,14 +236,14 @@ public class Train extends Logable implements IsVerifiable {
      * This method is used to set the wait time remaining for the train.
      */
     public void setWaitTimeRemaining() {
-        this.waitTimeRemaining = (startTime + whenRegistered()) - getCurrentTime();
+        this.waitTimeRemaining = this.waitTimeRemaining - getCurrentTime();
     }
 
     /**
      * Resets the wait time remaining for the train.
      */
     public void resetWaitTimeRemaining() {
-        this.waitTimeRemaining = getCurrentTime() + 1;
+        this.waitTimeRemaining = getCurrentTime();
     }
 
     /**
@@ -274,8 +275,6 @@ public class Train extends Logable implements IsVerifiable {
         this.currentLocation = currentStation.getName();
         // isAtStart is set to true
         this.isAtStart = Objects.equals(currentLocation, currentRoute.getStart().getName());
-        // Set the wait time remaining for the train to the start time
-        setWaitTimeRemaining();
     }
 
     /**
@@ -294,7 +293,7 @@ public class Train extends Logable implements IsVerifiable {
      * @return true if the train is waiting, false otherwise
      */
     public boolean isWaiting() {
-        return this.waitTimeRemaining > 0;
+        return this.waitTimeRemaining >= 0;
     }
 
     /**

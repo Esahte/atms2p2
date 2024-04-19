@@ -13,9 +13,7 @@ import p2.Logging.Train;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * The TrainSystem class represents a train system in a transportation system.
@@ -265,8 +263,22 @@ public class TrainSystem implements IsVerifiable {
             throw new IllegalStateException("System is not in the Initialised state.");
         }
 
-        // First, convert the segment names to Segment objects, checking for nulls
-        ArrayList<Segment> segments = Arrays.stream(rSegments)
+        ArrayList<Segment> segments = getSegmentsFromNames(rSegments);
+        Route route = new Route(rName, isRoundTrip, segments);
+        ArrayList<Station> orderedStations = getOrderedStations(segments);
+
+        route.addStations(orderedStations);
+        routes.add(route);
+    }
+
+    /**
+     * Return the segments from the names provided.
+     *
+     * @param rSegments The names of the segments.
+     * @return The segments with the provided names.
+     */
+    private ArrayList<Segment> getSegmentsFromNames(String[] rSegments) {
+        return Arrays.stream(rSegments)
                 .map(this::getSegmentByName)
                 .peek(segment -> {
                     if (segment == null) {
@@ -274,18 +286,27 @@ public class TrainSystem implements IsVerifiable {
                     }
                 })
                 .collect(Collectors.toCollection(ArrayList::new));
+    }
 
-        // Create the route with the segments
-        Route route = new Route(rName, isRoundTrip, segments);
-
-        // Extract stations from segments
-        Set<Station> stations = segments.stream()
-                .flatMap(segment -> Stream.of(segment.getSegmentStart(), segment.getSegmentEnd()))
-                .collect(Collectors.toSet());
-
-        // Add stations to the route
-        route.addStations(new ArrayList<>(stations));
-        routes.add(route);
+    /**
+     * Return the ordered stations from the segments provided.
+     *
+     * @param segments The segments to get the ordered stations from.
+     * @return The ordered stations from the segments.
+     */
+    private ArrayList<Station> getOrderedStations(ArrayList<Segment> segments) {
+        ArrayList<Station> orderedStations = new ArrayList<>();
+        for (Segment segment : segments) {
+            Station startStation = segment.getSegmentStart();
+            if (containsStation(startStation.getName())) {
+                orderedStations.add(startStation);
+            }
+        }
+        Station endStation = segments.get(segments.size() - 1).getSegmentEnd();
+        if (containsStation(endStation.getName())) {
+            orderedStations.add(endStation);
+        }
+        return orderedStations;
     }
 
 
@@ -363,7 +384,7 @@ public class TrainSystem implements IsVerifiable {
         Route route = this.routes.stream().filter(route1 -> route1.getName().equals(routeName)).findFirst().orElse(null);
 
         // If the train and route are found, and the train is not yet registered, and the route is verified and open
-        if (train != null && route != null && !train.isRegistered() && route.verify() && route.isOpen()) {
+        if (train != null && route != null && !train.isRegistered() && route.isOpen() && route.verify()) {
             ArrayList<String> allStations = route.getStationList().stream()
                     .map(Station::getName)
                     .collect(Collectors.toCollection(ArrayList::new));
@@ -394,7 +415,7 @@ public class TrainSystem implements IsVerifiable {
      * @return true if the train system contains the station, false otherwise
      */
     public boolean containsStation(String station) {
-        return stations.stream().anyMatch(station1 -> station1.getName().equals(station));
+        return stations.stream().anyMatch(station1 -> station1.getName().equals(station.strip()));
     }
 
     /**
@@ -547,7 +568,7 @@ public class TrainSystem implements IsVerifiable {
                     // Start the train
                     events.add(train.start());
                     // Open route
-                    events.add(openRoute(train.getCurrentRoute().getName()));
+                    if (!train.getCurrentRoute().isOpen()) events.add(openRoute(train.getCurrentRoute().getName()));
                 } else if (train.getCurrentRoute().getEnd().getName().strip().equals(train.currentStation().strip())) { // Check if the train is at the end, and its end time is the current time
                     // Finish the train
                     events.add(train.finish());
