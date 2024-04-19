@@ -381,7 +381,7 @@ public class Train extends Logable implements IsVerifiable {
      */
     @Override
     public boolean validate() {
-        return status.equals(TrainStatus.Initialised) && id != 0 && name != null && verify();
+        return status.equals(TrainStatus.Initialised) && id != 0 && name != null;
     }
 
     // toString method

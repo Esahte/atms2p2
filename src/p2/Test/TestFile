@@ -4,7 +4,7 @@ West Ruislip
 East Broadway
 North Action
 Noting Hill Gate
-Bond Street
+BondStreet
 Liverpool Street
 Stanmore
 BakerStreet
@@ -30,17 +30,17 @@ train_2:0: R_EB_EP: all
 train_3:5: R_EB_EP: Noting Hill Gate; Liverpool Street
 train_4:1: R_EB_EP: all
 train_6:1: R_BAS_EP: Liverpool Street
+Events: 1
+Close: Segment: basbs
 1
-Trains: 3
+Trains: 4
 train_1:2: R_WS_EP: all
 train_2:0: R_EB_EP: all
 train_3:5: R_EB_EP: Noting Hill Gate; Liverpool Street
+train_4:1: R_EB_EP: all
 3
 Events: 1
-Close: Segment: basbs
-8
-Events: 1
 Open: Segment: basbs
-Trains: 2
+8
+Trains: 1
 train_6:1: R_BAS_EP: Liverpool Street
-train_4:1: R_EB_EP: all
