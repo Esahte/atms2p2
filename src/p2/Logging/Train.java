@@ -193,6 +193,15 @@ public class Train extends Logable implements IsVerifiable {
         return currentTime;
     }
 
+    /**
+     * This method is used to get the wait time remaining for the train.
+     *
+     * @return int This returns the wait time remaining for the train.
+     */
+    public int getWaitTimeRemaining() {
+        return waitTimeRemaining;
+    }
+
     // Setter methods
 
     /**

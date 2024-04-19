@@ -91,7 +91,7 @@ public class TrainSystem implements IsVerifiable {
                 tns.append(ss.indexOf(s) == 0 ? "\n\t" : "\t").append(s).append(ss.indexOf(s) != ss.size() - 1 ? "\n" : "\n\t]");
         }
         return "---------- ---------- ---------- ---------- ---------- ----------\nTrainSystem [\n\nstatus="
-                + status.getDescription() + "\nverified=" + (verify() ? "Yes" : "No") + "\n\ntrains=" + tns
+                + currentStatus().getDescription() + "\nverified=" + (verify() ? "Yes" : "No") + "\n\ntrains=" + tns
                 + "\n\nroutes=" + rts + "\n\nsegments=" + sgs + "\n\nstations=" + sts
                 + "\n]\n---------- ---------- ---------- ---------- ---------- ----------";
     }
@@ -160,7 +160,7 @@ public class TrainSystem implements IsVerifiable {
      * @throws IllegalStateException if the system is not in the Initialised state
      */
     public void addStation(String sName) {
-        if (status != SystemStatus.Initialised) {
+        if (currentStatus() != SystemStatus.Initialised) {
             throw new IllegalStateException("System is not in the Initialised state.");
         }
         this.stations.add(new Station(sName));
@@ -174,7 +174,7 @@ public class TrainSystem implements IsVerifiable {
      * @throws IllegalStateException if the system is not in the Initialised state
      */
     public void removeStation(String sName) {
-        if (status != SystemStatus.Initialised) {
+        if (currentStatus() != SystemStatus.Initialised) {
             throw new IllegalStateException("System is not in the Initialised state.");
         }
         stations.removeIf(station -> station.getName().equals(sName));
@@ -209,7 +209,7 @@ public class TrainSystem implements IsVerifiable {
      * @throws IllegalStateException if the system is not in the Initialised state
      */
     public void addSegment(String sName, String start, String sEnd) {
-        if (status != SystemStatus.Initialised) {
+        if (currentStatus() != SystemStatus.Initialised) {
             throw new IllegalStateException("System is not in the Initialised state.");
         }
         segments.add(new Segment(sName, start, sEnd));
@@ -223,7 +223,7 @@ public class TrainSystem implements IsVerifiable {
      * @throws IllegalStateException if the system is not in the Initialised state
      */
     public void removeSegment(String sName) {
-        if (status != SystemStatus.Initialised) {
+        if (currentStatus() != SystemStatus.Initialised) {
             throw new IllegalStateException("System is not in the Initialised state.");
         }
         segments.removeIf(segment -> segment.getName().equals(sName));
@@ -259,7 +259,7 @@ public class TrainSystem implements IsVerifiable {
      * @throws IllegalStateException if the system is not in the Initialised state
      */
     public void addRoute(String rName, boolean isRoundTrip, String[] rSegments) {
-        if (status != SystemStatus.Initialised) {
+        if (currentStatus() != SystemStatus.Initialised) {
             throw new IllegalStateException("System is not in the Initialised state.");
         }
 
@@ -318,7 +318,7 @@ public class TrainSystem implements IsVerifiable {
      * @throws IllegalStateException if the system is not in the Initialised state
      */
     public void removeRoute(String rName) {
-        if (status != SystemStatus.Initialised) {
+        if (currentStatus() != SystemStatus.Initialised) {
             throw new IllegalStateException("System is not in the Initialised state.");
         }
         routes.removeIf(route -> route.getName().equals(rName));
@@ -349,7 +349,7 @@ public class TrainSystem implements IsVerifiable {
      * @throws IllegalStateException if the system is not in the Initialised state
      */
     public void addTrain(String name, int startTime) {
-        if (status != SystemStatus.Initialised) {
+        if (currentStatus() != SystemStatus.Initialised) {
             throw new IllegalStateException("System is not in the Initialised state.");
         }
         trains.add(new Train(name, startTime));
@@ -363,7 +363,7 @@ public class TrainSystem implements IsVerifiable {
      * @throws IllegalStateException if the system is not in the Initialised state
      */
     public void removeTrain(int id) {
-        if (status != SystemStatus.Initialised) {
+        if (currentStatus() != SystemStatus.Initialised) {
             throw new IllegalStateException("System is not in the Initialised state.");
         }
         trains.removeIf(train -> train.getId() == id);
@@ -496,10 +496,10 @@ public class TrainSystem implements IsVerifiable {
     }
 
     /**
-     * Sets the status of the train system to stop.
+     * Sets the status of the train system to deadlock.
      */
     public void setStopped() {
-        this.status = SystemStatus.Finished;
+        this.status = SystemStatus.Deadlocked;
     }
 
     /**
@@ -535,16 +535,16 @@ public class TrainSystem implements IsVerifiable {
      * @return true if the closure is hindering the movement of the train, false otherwise
      */
     public boolean closureHinderingMovement() {
-        /*
-         * call this method if advance returns no events, and you want to determine if
-         * the system is deadlocked, i.e., there are trains to move, but none of them can
-         * move because of closures.
-         *
-         * this method should not return true if trains have stopped at a station and
-         * are waiting on a future time instant to move.
-         *
-         */
-        return false;
+        return trains.stream().allMatch(train -> train.getWaitTimeRemaining() > currentTime);
+    }
+
+    /**
+     * Checks if all trains have reached their destination.
+     *
+     * @return true if all trains have reached their destination, false otherwise
+     */
+    public boolean allTrainsReachedDestination() {
+        return trains.stream().allMatch(train -> train.currentStation().equals(train.getCurrentRoute().getEnd().getName()));
     }
 
     /**
@@ -553,8 +553,13 @@ public class TrainSystem implements IsVerifiable {
      * @return the advanced time
      */
     public List<Event> advance() {
-        if (status != SystemStatus.Operational) {
+        if (currentStatus() == SystemStatus.Deadlocked) {
             throw new IllegalStateException("The system is not operational.");
+        }
+
+        if (allTrainsReachedDestination()) {
+            status = SystemStatus.Finished;
+            return new ArrayList<>();
         }
 
         List<Event> events = new ArrayList<>();
@@ -711,5 +716,9 @@ public class TrainSystem implements IsVerifiable {
 
     public boolean validateObjectLog(ObjectType object, String name, ArrayList<String> events) {
         return true;
+    }
+
+    public boolean isFinished() {
+        return currentStatus() == SystemStatus.Finished;
     }
 }

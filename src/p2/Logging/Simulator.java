@@ -280,7 +280,7 @@ public class Simulator extends Logable {
             setStatus(SimulatorStatus.Working);
             // Start the system
             trainSystem.setToWorking();
-            while (getStatus() == SimulatorStatus.Working && scanner.hasNextLine() && trainSystem.getCurrentTime() != 50) {
+            while (getStatus() == SimulatorStatus.Working && scanner.hasNextLine()) {
                 trainSystem.incrementTime();
 
                 if (scanner.hasNextLine() && nextTimeInstance == trainSystem.getCurrentTime()) {
@@ -294,13 +294,15 @@ public class Simulator extends Logable {
                     if (e.getTime() != trainSystem.getCurrentTime())
                         flaggedEvents.add(e.toString());
                     addToLog(e);
-                    addToLog(e.toString());  // Print each event descriptively as it occurs
+//                    addToLog(e.toString());  // Print each event descriptively as it occurs
+                    System.out.println(e.toString());
                 }
 
                 // Check if the system is deadlocked
-                if (trainSystem.closureHinderingMovement()) {
-                    trainSystem.setStopped();
-                }
+                if (trainSystem.closureHinderingMovement()) trainSystem.setStopped();
+
+                // Check if the system is finished
+                if (trainSystem.isFinished()) setStatus(SimulatorStatus.Finished);
             }
         } finally {
             if (scanner != null) {
