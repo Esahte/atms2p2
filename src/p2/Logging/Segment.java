@@ -82,8 +82,8 @@ public class Segment extends AbstractEntity implements Comparable<Segment> {
         return currentTrain;
     }
 
-    public void setCurrentTrain(String currentTrain) {
-        this.currentTrain = getTrainSystem().getTrainByName(currentTrain);
+    public void setCurrentTrain(Train currentTrain) {
+        this.currentTrain = currentTrain;
     }
 
     // Methods related to traffic light
@@ -128,7 +128,7 @@ public class Segment extends AbstractEntity implements Comparable<Segment> {
      * @throws IllegalStateException if the segment already has a Train
      */
     public Event acceptTrain(Train train, int time) {
-        if (!hasTrain() && isOpen() && trafficLight.isGreen()) setCurrentTrain(train.getName());
+        if (!hasTrain() && isOpen() && trafficLight.isGreen()) setCurrentTrain(train);
         else throw new IllegalStateException("Train already in segment.");
         return new OccupiedEvent(this.getName(), time, train.getName(), true);
     }
@@ -140,9 +140,10 @@ public class Segment extends AbstractEntity implements Comparable<Segment> {
      * @throws IllegalStateException if the segment does not have a Train
      */
     public Event releaseTrain(int time) {
+        String trainName = currentTrain.getName();
         if (hasTrain() && segmentEnd.isOpen()) setCurrentTrain(null);
         else throw new IllegalStateException("No train in segment.");
-        return new OccupiedEvent(this.getName(), time, this.currentTrain.getName(), false);
+        return new OccupiedEvent(this.getName(), time, trainName, false);
     }
 
     // Verification methods

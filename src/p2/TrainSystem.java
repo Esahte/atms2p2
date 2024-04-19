@@ -384,7 +384,7 @@ public class TrainSystem implements IsVerifiable {
         Route route = this.routes.stream().filter(route1 -> route1.getName().equals(routeName)).findFirst().orElse(null);
 
         // If the train and route are found, and the train is not yet registered, and the route is verified and open
-        if (train != null && route != null && !train.isRegistered() && route.isOpen() && route.verify()) {
+        if (train != null && route != null && !train.isRegistered()) {
             ArrayList<String> allStations = route.getStationList().stream()
                     .map(Station::getName)
                     .collect(Collectors.toCollection(ArrayList::new));
@@ -544,7 +544,7 @@ public class TrainSystem implements IsVerifiable {
      * @return true if all trains have reached their destination, false otherwise
      */
     public boolean allTrainsReachedDestination() {
-        return trains.stream().allMatch(train -> train.currentStation().equals(train.getCurrentRoute().getEnd().getName()));
+        return trains.stream().allMatch(train -> train.getCurrentRoute().getEnd().getName().strip().equals(train.currentStation().strip()));
     }
 
     /**
@@ -574,11 +574,6 @@ public class TrainSystem implements IsVerifiable {
                     events.add(train.start());
                     // Open route
                     if (!train.getCurrentRoute().isOpen()) events.add(openRoute(train.getCurrentRoute().getName()));
-                } else if (train.getCurrentRoute().getEnd().getName().strip().equals(train.currentStation().strip())) { // Check if the train is at the end, and its end time is the current time
-                    // Finish the train
-                    events.add(train.finish());
-                    // Deregister the train
-                    deRegisterTrain(train.getName());
                 }
                 // Check the status of the train
                 checkTrainStatus(train, events);
@@ -616,11 +611,10 @@ public class TrainSystem implements IsVerifiable {
      * @param events A list of events that occur during the simulation.
      */
     private void processSegmentTransition(Train train, List<Event> events) {
-        Segment currentSegment = train.getCurrentSegment();
         // If the current segment has a train, and it is not open, open the segment and release the train
-        if (currentSegment.hasTrain() && !currentSegment.isOpen()) {
-            openSegmentAndReleaseTrain(currentSegment, train, currentTime, events);
-        } else if (!currentSegment.hasTrain() && !currentSegment.isOpen()) { // If the current segment does not have a train, and it is not open, reset the trains wait time
+        if (train.getCurrentSegment().hasTrain() && !train.getCurrentSegment().isOpen()) {
+            openSegmentAndReleaseTrain(train.getCurrentSegment(), train, currentTime, events);
+        } else if (!train.getCurrentSegment().hasTrain() && !train.getCurrentSegment().isOpen()) { // If the current segment does not have a train, and it is not open, reset the trains wait time
             train.resetWaitTimeRemaining();
         }
 
@@ -630,9 +624,16 @@ public class TrainSystem implements IsVerifiable {
             train.resetWaitTimeRemaining();
         }
 
+        // Check if the train is at the end, and its end time is the current time
+        if (train.getCurrentRoute().getEnd().getName().strip().equals(train.currentStation().strip())) {
+            events.add(train.finish());
+            deRegisterTrain(train.getName());
+            return;
+        }
+
         // If the current segment does not have a train, it is open, and the train is not waiting, accept the train into the segment
-        if (!currentSegment.hasTrain() && currentSegment.isOpen() && !train.isWaiting()) {
-            acceptTrainIntoSegment(currentSegment, train, currentTime, events);
+        if (!train.getCurrentSegment().hasTrain() && train.getCurrentSegment().isOpen() && !train.isWaiting()) {
+            acceptTrainIntoSegment(train.getCurrentSegment(), train, currentTime, events);
         }
     }
 

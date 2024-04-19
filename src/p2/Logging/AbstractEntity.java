@@ -18,7 +18,6 @@ abstract class AbstractEntity extends Logable implements IsVerifiable {
     private final String name;
     // The status of the entity
     private RSStatus status = RSStatus.Open;
-    private final TrainSystem trainSystem = new TrainSystem();
     private int currentTime;
 
     /**
@@ -56,15 +55,6 @@ abstract class AbstractEntity extends Logable implements IsVerifiable {
      * @return ObjectType This returns the type of the object.
      */
     public abstract ObjectType getType();
-
-    /**
-     * This method is used to get the train system of the object.
-     *
-     * @return TrainSystem This returns the train system of the object.
-     */
-    public TrainSystem getTrainSystem() {
-        return trainSystem;
-    }
 
     /**
      * This method is used to get the type of the object.

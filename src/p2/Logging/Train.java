@@ -10,7 +10,6 @@ import p2.Interfaces.IsVerifiable;
 
 import java.util.ArrayList;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * The Train class represents a train in a transportation system.
@@ -194,6 +193,17 @@ public class Train extends Logable implements IsVerifiable {
     }
 
     /**
+     * This method is used to set the current time of the object.
+     *
+     * @param currentTime This is the current time of the object.
+     */
+    public void setCurrentTime(int currentTime) {
+        this.currentTime = currentTime;
+    }
+
+    // Setter methods
+
+    /**
      * This method is used to get the wait time remaining for the train.
      *
      * @return int This returns the wait time remaining for the train.
@@ -201,8 +211,6 @@ public class Train extends Logable implements IsVerifiable {
     public int getWaitTimeRemaining() {
         return waitTimeRemaining;
     }
-
-    // Setter methods
 
     /**
      * Returns the status of the train.
@@ -231,6 +239,8 @@ public class Train extends Logable implements IsVerifiable {
         return isAtStart;
     }
 
+    // create method to set waiting time remaining it does not have a parameter
+
     /**
      * Sets the current location of the train.
      *
@@ -240,7 +250,6 @@ public class Train extends Logable implements IsVerifiable {
         this.currentLocation = currentLocation;
     }
 
-    // create method to set waiting time remaining it does not have a parameter
     /**
      * This method is used to set the wait time remaining for the train.
      */
@@ -253,15 +262,6 @@ public class Train extends Logable implements IsVerifiable {
      */
     public void resetWaitTimeRemaining() {
         this.waitTimeRemaining = getCurrentTime();
-    }
-
-    /**
-     * This method is used to set the current time of the object.
-     *
-     * @param currentTime This is the current time of the object.
-     */
-    public void setCurrentTime(int currentTime) {
-        this.currentTime = currentTime;
     }
 
     // Methods related to train's actions
@@ -283,17 +283,15 @@ public class Train extends Logable implements IsVerifiable {
         // Set the current location of the train
         this.currentLocation = currentStation.getName();
         // isAtStart is set to true
-        this.isAtStart = Objects.equals(currentLocation, currentRoute.getStart().getName());
+        this.isAtStart = Objects.equals(currentLocation, currentRoute.getStart().getName().strip());
     }
 
     /**
      * De-registers the train by resetting the start time, current route, current location, and designated stops.
      */
     public void deregister() {
-        startTime = -1;
-        changeRout(null);
-        setCurrentLocation(null);
-        setDesignatedStops(null);
+        timeRegistered = -1;
+        status = TrainStatus.Completed;
     }
 
     /**
@@ -321,7 +319,7 @@ public class Train extends Logable implements IsVerifiable {
      * @return an event representing the finish of the train
      */
     public Event finish() {
-        if (currentLocation.equals(currentRoute.getEnd().getName())) setStatus(TrainStatus.Completed);
+        if (currentLocation.equals(currentRoute.getEnd().getName().strip())) setStatus(TrainStatus.Completed);
         return new CFOSEvent(getName(), getCurrentTime(), Action.Finish);
     }
 
@@ -334,13 +332,16 @@ public class Train extends Logable implements IsVerifiable {
      * @return an event representing the movement of the train
      */
     public Event advance(int time) {
-        if (currentRoute.verify() && status.equals(TrainStatus.Started) && currentRoute.canGetTo(nextStation())) {
+        String previousStation = currentStation();
+        if (status.equals(TrainStatus.Started) && currentRoute.canGetTo(nextStation())) {
             currentStation = currentRoute.getNextStation(currentStation());
+            currentLocation = currentStation.getName();
+            currentSegment = currentRoute.getNextSegment(currentStation());
         } else {
             System.out.print("There seems to be an issue with the route or the train status.");
         }
 
-        return new MoveEvent(this.name, time, this.currentStation(), nextStation());
+        return new MoveEvent(this.name, time, previousStation, currentStation());
     }
 
     /**

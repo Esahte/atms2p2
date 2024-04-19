@@ -280,7 +280,7 @@ public class Simulator extends Logable {
             setStatus(SimulatorStatus.Working);
             // Start the system
             trainSystem.setToWorking();
-            while (getStatus() == SimulatorStatus.Working && scanner.hasNextLine()) {
+            while (getStatus() == SimulatorStatus.Working || scanner.hasNextLine()) {
                 trainSystem.incrementTime();
 
                 if (scanner.hasNextLine() && nextTimeInstance == trainSystem.getCurrentTime()) {
