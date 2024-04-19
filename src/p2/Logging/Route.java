@@ -184,8 +184,8 @@ public class Route extends AbstractEntity implements Comparable<Route> {
      * @return true if the segments on the route are properly sequenced, false otherwise
      */
     public boolean areSegmentsProperlySequenced() {
-        return IntStream.range(0, segments.size() - 1)
-                .allMatch(i -> segments.get(i).getSegmentEnd().equals(segments.get(i + 1).getSegmentStart()));
+        return IntStream.range(0, segments.size() - 2)
+                .allMatch(i -> segments.get(i).getSegmentEnd().getName().equals(segments.get(i + 1).getSegmentStart().getName()));
     }
 
     /**
@@ -207,7 +207,8 @@ public class Route extends AbstractEntity implements Comparable<Route> {
      */
     @Override
     public boolean verify() {
-        return true;
+        return super.verify() && !segments.isEmpty() && (isRoundTrip() && getStart() == getEnd() || !isRoundTrip() && getStart() != getEnd()) &&
+                segments.stream().distinct().count() == segments.size() && segments.stream().allMatch(Segment::verify) && areSegmentsProperlySequenced();
     }
 
     /**

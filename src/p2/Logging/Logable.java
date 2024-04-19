@@ -1,5 +1,7 @@
 package p2.Logging;
 
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import p2.Events.Event;
 
 import java.util.ArrayList;
@@ -8,6 +10,7 @@ import java.util.List;
 
 public abstract class Logable {
 
+    private final StringProperty log = new SimpleStringProperty(this, "log", "");
     /* once an event is added to the log, it cannot be removed or changed. */
     protected List<Event> events = new ArrayList<Event>();
 
@@ -111,5 +114,17 @@ public abstract class Logable {
                 events.append(this.events.indexOf(e) == 0 ? "\n\t" : "\t").append(e).append(this.events.indexOf(e) != this.events.size() - 1 ? "\n" : "\n\t]");
         }
         return events.toString();
+    }
+
+    // Method to append text to the log
+    public void addToLog(String message) {
+        javafx.application.Platform.runLater(() -> {
+            log.set(log.get() + message + "\n");
+        });
+    }
+
+    // Property getter
+    public StringProperty logProperty() {
+        return log;
     }
 }
